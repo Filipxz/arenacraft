@@ -2,7 +2,7 @@ import type { LadderRow } from "./ladder";
 import type { LadderRepository } from "./LadderRepository";
 
 // Local development data. No database is required with DATA_SOURCE=dummy (the default).
-const DUMMY_ROWS: LadderRow[] = [
+export const DUMMY_LADDER_ROWS: LadderRow[] = [
   {
     charName: "Kalvax",
     classId: 4,
@@ -96,6 +96,6 @@ const DUMMY_ROWS: LadderRow[] = [
 
 export class DummyLadderRepository implements LadderRepository {
   async topSoloq(limit: number): Promise<LadderRow[]> {
-    return DUMMY_ROWS.slice(0, Math.max(0, Math.floor(limit)));
+    return DUMMY_LADDER_ROWS.slice(0, Math.max(0, Math.floor(limit)));
   }
 }

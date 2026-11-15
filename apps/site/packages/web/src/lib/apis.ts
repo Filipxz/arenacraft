@@ -1,9 +1,14 @@
 import {
+  armoryContract,
   createFetchClient,
   ladderContract,
   playerOverlayContract,
   streamersContract,
 } from "@arenacraft/common";
+
+export const armoryApi = createFetchClient(armoryContract, {
+  baseUrl: `${import.meta.env.BASE_URL}api`,
+});
 
 export const ladderApi = createFetchClient(ladderContract, {
   baseUrl: `${import.meta.env.BASE_URL}api`,

@@ -43,3 +43,22 @@ Options:
 Set `REDIS_URL` to target a non-default Redis/Valkey. Without `--team-a-ids` / `--team-b-ids`
 a listener resolves the fake `accountId`s through `account_discord`; pass IDs for a purely fake
 match with no DB accounts.
+
+## gen_armory_data
+
+Regenerates the client data the website armory needs
+(`apps/site/packages/backend/src/features/armory/generated/armoryData.ts`): talent trees with talent
+names and icons, socket enchantment -> gem item, and glyph ids -> glyph spells. It reads
+`Talent`, `TalentTab`, `GemProperties`, `GlyphProperties`, `Spell` and `SpellIcon` from `data/dbc`
+(`scripts/extract_assets`) and gem items from `data/sql/base/db_world/item_template.sql`.
+
+```bash
+bun scripts/gen_armory_data
+```
+
+Without extracted DBCs, `--wago <build>` reads the same tables from wago.tools (a Wrath Classic
+build, same ids as 3.3.5) and spell names/icons from Wowhead's tooltip API:
+
+```bash
+bun scripts/gen_armory_data --wago 3.4.3.54261
+```

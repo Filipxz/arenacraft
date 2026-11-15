@@ -41,7 +41,7 @@ Follow `docs/domain-modeling-playbook.md` first, then `docs/backend-feature-play
 ## Routing
 
 The frontend is one SPA served from `index.html`; client-side routes are `/`, `/tournaments`,
-`/ladder` and `/streamers` (React Router in `packages/web/src/App.tsx`). Unknown non-asset paths
+`/ladder`, `/streamers`, `/armory` and `/armory/:name` (React Router in `packages/web/src/App.tsx`). Unknown non-asset paths
 fall back to `index.html` in `packages/backend/src/lib/serveStaticAssets.ts`, so deep links work.
 Pages live in `packages/web/src/pages/`, shared UI in `packages/web/src/components/`, and design
 tokens (Archivo font, colors) in `packages/web/src/global.css`.
@@ -55,6 +55,15 @@ unlinked. The token comes from the Discord bot's `/overlay` command (auth DB `ac
 the page polls `/api/overlay/:token` (`packages/backend/src/features/playerOverlay/`), which reads
 the character's SoloQ history from the core's arena replays (`arena_replay`). With
 `DATA_SOURCE=dummy`, open `/overlay/dummyoverlaytoken000000000000000`.
+
+## Armory
+
+`/armory` and `/armory/:name` (`packages/backend/src/features/armory/`). Character data comes from
+the characters DB through `ArmoryRepository` (`DummyArmoryRepository` reuses the ladder fixtures, so
+every dummy ladder name has a page, e.g. `/armory/Kalvax`). Item names/icons come from
+`ItemInfoSource`: Wowhead's tooltip API in production, fixtures with `DATA_SOURCE=dummy`. Talent
+trees, gems and glyphs are a generated table (`generated/armoryData.ts`, `bun scripts/gen_armory_data`
+from the repo root): never edit it by hand.
 
 ## Frontend config
 

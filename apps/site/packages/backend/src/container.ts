@@ -1,4 +1,12 @@
 import { Container } from "@needle-di/core";
+import { ArmoryApi } from "./features/armory/ArmoryApi";
+import { ARMORY_REPOSITORY } from "./features/armory/ArmoryRepository";
+import { ArmoryService } from "./features/armory/ArmoryService";
+import { DummyArmoryRepository } from "./features/armory/DummyArmoryRepository";
+import { DummyItemInfoSource } from "./features/armory/DummyItemInfoSource";
+import { ITEM_INFO_SOURCE } from "./features/armory/ItemInfoSource";
+import { MySqlArmoryRepository } from "./features/armory/MySqlArmoryRepository";
+import { WowheadItemInfoSource } from "./features/armory/WowheadItemInfoSource";
 import { DummyLadderRepository } from "./features/ladder/DummyLadderRepository";
 import { LadderApi } from "./features/ladder/LadderApi";
 import { LADDER_REPOSITORY } from "./features/ladder/LadderRepository";
@@ -43,6 +51,8 @@ export function createContainer(env: NodeJS.ProcessEnv = process.env): Container
   container.bind(PlayerOverlayApi);
   container.bind(StreamersService);
   container.bind(StreamersApi);
+  container.bind(ArmoryService);
+  container.bind(ArmoryApi);
   container.bind(HttpServer);
 
   // The streamer zone talks to Twitch in production and serves fixtures with DATA_SOURCE=dummy,
@@ -64,6 +74,12 @@ export function createContainer(env: NodeJS.ProcessEnv = process.env): Container
       provide: LADDER_REPOSITORY,
       useValue: new MySqlLadderRepository(db, config.dbTimeoutMs),
     });
+    container.bind({
+      provide: ARMORY_REPOSITORY,
+      useValue: new MySqlArmoryRepository(db, config.dbTimeoutMs),
+    });
+    // The site has no world database: item names and icons come from Wowhead's WotLK data.
+    container.bind({ provide: ITEM_INFO_SOURCE, useValue: new WowheadItemInfoSource() });
     container.bind({ multi: true, provide: OnDeinit, useValue: { deinit: close } });
 
     // Aliases and overlay tokens live in the auth database. It is optional: without AUTH_DB_URL the
@@ -86,6 +102,8 @@ export function createContainer(env: NodeJS.ProcessEnv = process.env): Container
     });
   } else {
     container.bind({ provide: LADDER_REPOSITORY, useValue: new DummyLadderRepository() });
+    container.bind({ provide: ARMORY_REPOSITORY, useValue: new DummyArmoryRepository() });
+    container.bind({ provide: ITEM_INFO_SOURCE, useValue: new DummyItemInfoSource() });
     container.bind({ provide: LADDER_TOP_SERVICE, useClass: MockLadderTopService });
     container.bind({
       provide: PLAYER_OVERLAY_REPOSITORY,
