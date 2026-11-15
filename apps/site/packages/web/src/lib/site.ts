@@ -14,5 +14,6 @@ export const NAV_LINKS = [
   { label: "Home", to: "/" },
   { label: "Tournaments", to: "/tournaments" },
   { label: "Ladder", to: "/ladder" },
+  { label: "Armory", to: "/armory" },
   { label: "Streamer zone", to: "/streamers" },
 ] as const;

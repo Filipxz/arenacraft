@@ -6,6 +6,8 @@ React frontend, and a MySQL ladder repository.
 ```
 GET /api/ladder/soloq -> [{ "name", "class", "role", "rating", "wins", "losses" }, ...]
 GET /api/streamers    -> [{ "login", "name", "avatarUrl", "live": { ... } | null }, ...]
+GET /api/armory/characters       -> [{ "name", "class", "race", "level", "rating", "wins", "losses" }, ...]
+GET /api/armory/characters/:name -> { "name", "equipment", "talentGroups", "matches", ... }
 GET /api/health       -> { "ok": true }
 ```
 
@@ -20,6 +22,8 @@ The frontend sorts nothing — the server returns the best rating first.
 | `/tournaments` | Tourney schedule, prizes and rules                                                 |
 | `/ladder`      | Live SoloQ ladder, filterable by role; refreshes every 60 seconds                  |
 | `/streamers`   | Twitch streamer zone: live channels first, affiliated offline channels below      |
+| `/armory`      | Every character, searchable and filterable by class; SoloQ players first          |
+| `/armory/:name`| One character: gear, talents and glyphs, SoloQ standing, recent matches           |
 | `/live-ladder` | Unlisted OBS widget: live top 5 over WebSocket                                     |
 
 Routing is client-side (React Router). The backend serves `index.html` for unknown non-asset
@@ -83,6 +87,41 @@ For real status, register an app at <https://dev.twitch.tv/console/apps> and pas
 grant. Without them production still renders the whitelist, but reports every channel offline
 rather than inventing liveness.
 
+## Armory
+
+`/armory` lists every live (not deleted) character; `/armory/:name` is one character's page. Ladder
+names, match participants and the index all link there. The name in the URL is case-insensitive
+(normalized like the core: `kALVAX` -> `Kalvax`).
+
+A character page shows:
+
+- **Header**: level, race, class, active spec and guild; SoloQ rating, ladder rank, season record,
+  average item level (the in-game formula over 17 slots) and the talent point split.
+- **Equipment**: the in-game paperdoll. Hovering an item shows Wowhead's tooltip with the real
+  enchant, gems, extra socket and active set bonuses.
+- **Talents**: both specs on dual-spec characters, full trees with ranks, glyphs, and a link to
+  Wowhead's talent calculator with the same build.
+- **Recent SoloQ matches**: the last 20 decided matches from the arena replays (`arena_replay`),
+  with both teams, arena, length and the `.replay <id>` command to watch them in game.
+
+Data sources:
+
+- Everything about the character comes from the characters database (`characters`,
+  `character_inventory`, `item_instance`, `character_talent`, `character_glyphs`, `guild*`,
+  `arena_team*`, `arena_replay*`).
+- The site has no world database, so item names, quality, icons and item levels come from
+  Wowhead's WotLK tooltip API (`WowheadItemInfoSource`). Each item is requested once and cached for
+  the life of the process; failures render the item as `Item #id` and are retried after 10 minutes.
+  `DATA_SOURCE=dummy` uses fixture item data instead and makes no requests.
+- Talent trees, talent names and icons, gem enchantment -> gem item and glyph ids come from client
+  data, baked into `packages/backend/src/features/armory/generated/armoryData.ts` by
+  `bun scripts/gen_armory_data` (repo root). Regenerate it from `data/dbc` when the client data or
+  `item_template` changes.
+- In the browser, icons load from Wowhead's CDN (`wow.zamimg.com`) and the armory page loads
+  Wowhead's tooltip script for hover tooltips.
+
+Profiles and the index are cached for 30 seconds.
+
 ## Assets
 
 - Hero art, the Archivo subset and class icons live in `packages/web/src/assets/`.
@@ -119,8 +158,10 @@ CHARACTER_DB_URL=mysql://ladder:password@localhost:3306/acore_characters \
 bun run dev:backend
 ```
 
-Use a SELECT-only database account. The query reads `characters`, `arena_team`,
-`arena_team_member`, and `character_soloq_role`. Set `AUTH_DB_URL` as well to read the bot-managed
+Use a SELECT-only database account. The ladder reads `characters`, `arena_team`,
+`arena_team_member`, and `character_soloq_role`; the armory also reads `character_inventory`,
+`item_instance`, `character_talent`, `character_glyphs`, `guild`, `guild_member`, `arena_replay` and
+`arena_replay_player`. Set `AUTH_DB_URL` as well to read the bot-managed
 `account_alias` table for the live ladder widget (character names are used without it).
 
 ## Configuration

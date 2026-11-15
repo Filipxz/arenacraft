@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CharacterLink } from "@/components/armory/CharacterLink";
 import { ClassIcon } from "@/components/ClassIcon";
 import { PageHero } from "@/components/PageHero";
 import { useLadder } from "@/hooks/useLadder";
@@ -86,7 +87,9 @@ export function LadderPage() {
                     <td className="w-9 border-b border-divider py-2 pr-0 pl-2">
                       <ClassIcon wowClass={entry.class} />
                     </td>
-                    <td className="border-b border-divider p-2 font-bold">{entry.name}</td>
+                    <td className="border-b border-divider p-2">
+                      <CharacterLink name={entry.name} className="text-ink" />
+                    </td>
                     <td
                       className="border-b border-divider p-2 font-bold"
                       style={{ color: CLASS_COLORS[entry.class] }}

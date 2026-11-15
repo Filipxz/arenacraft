@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { WebSocketServer } from "ws";
+import { ArmoryApi } from "@/features/armory/ArmoryApi";
 import { LadderApi } from "@/features/ladder/LadderApi";
 import { LadderTopSocket } from "@/features/liveLadder/LadderTopSocket";
 import { PlayerOverlayApi } from "@/features/playerOverlay/PlayerOverlayApi";
@@ -32,6 +33,7 @@ export class HttpServer implements OnDeinit, OnInit {
     private readonly ladderTopSocket: LadderTopSocket = inject(LadderTopSocket),
     private readonly playerOverlayApi: PlayerOverlayApi = inject(PlayerOverlayApi),
     private readonly streamersApi: StreamersApi = inject(StreamersApi),
+    private readonly armoryApi: ArmoryApi = inject(ArmoryApi),
   ) {}
 
   async init() {
@@ -98,6 +100,7 @@ export class HttpServer implements OnDeinit, OnInit {
     api.route("/live-ladder", this.ladderTopSocket.build());
     api.route("/", this.playerOverlayApi.build());
     api.route("/", this.streamersApi.build());
+    api.route("/", this.armoryApi.build());
     app.route("/api", api);
     app.get("*", serveStaticAssets(frontendDistPath));
 
