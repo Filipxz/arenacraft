@@ -30,6 +30,8 @@ Needs `nix`, `podman` (or docker), and a 3.3.5a client.
   warm-up, no push) and publishes the amd64 image on pushes to `local`
 - `scripts/deploy` build the amd64 image and ship it to the target
 - `scripts/restart_world` restart the world service on the target and prune old images
+- `scripts/restore_local_backup` load a production volume backup into the local compose stack
+  (see `scripts/README.md`)
 
 ## CI image
 
